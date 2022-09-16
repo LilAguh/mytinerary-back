@@ -1,13 +1,23 @@
 var express = require('express');
 var router = express.Router();
-var cityRouter = require('./cities')
+const cityRouter = require('./cities')
+const authRouter = require('./auth')
+const itineraryRouter = require('./itineraries')
+const activityRouter = require('./activities')
+const commentRouter = require('./comments')
+
 /* GET home page. */
-//req = request, peticion del cliente, solo lectura
-//res= response, mensaje que envia el servidor
 router.get('/', function (req, res, next) {
-  res.render('index', { title: 'MyTinerary' })
+  // res.json();
+  res.render('index', { title: 'MyTinerary' });
 });
 
+
+// Va a unir todas las rutas en index
 router.use('/cities', cityRouter)
+router.use('/auth', authRouter)
+router.use('/itineraries', itineraryRouter)
+router.use('/activities', activityRouter)
+router.use('/comments', commentRouter)
 
 module.exports = router;

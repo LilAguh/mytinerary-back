@@ -1,68 +1,87 @@
 const City = require('../models/City')
 
-const cityController = {
-    //funcion creadora de nueva ciudad
+const cityContoller = {
     create: async (req, res) => {
         const { city, country, photo, population, fundation, information } = req.body
 
+
         try {
-            await new City({ city, country, photo, population, fundation, information }).save()
+           let cities = await new City(req.body).save() // req.body tiene que tener, todas las varibles descriptas
             res.status(201).json({
-                message: 'city create',
-                succes: true
+                message: 'city created',
+                success: true,
+                id: cities._id
             })
-        }
-        catch (error) {
+        } catch (error) {
             res.status(400).json({
                 message: "could't create city",
                 success: false
             })
+
+
         }
     },
-    allRead: async (req, res) => {
+    read: async (req, res) => {
+        const { id } = req.params
+        console.log(id)
         try {
-            let city = await City.find()
-            res.status(200).json({
-                message: 'you get all cities',
-                response: city,
-                succes: true
-            })
-        }
-        catch (error) {
+            let city = await City.findOne({ _id: id })
+
+            if (city) {
+                res.status(200).json({
+                    message: 'you get one city',
+                    response: city,
+                    success: true
+                })
+            } else {
+                res.status(404).json({
+                    message: "could't find city",
+                    success: false
+                })
+            }
+
+        } catch (error) {
+            console.log(error)
             res.status(400).json({
-                message: "error displaying cities",
+                message: "error",
                 success: false
             })
         }
     },
-    //funcion busca ciudad por id
-    read: async (req, res) => {
-        const { id } = req.params
+    all: async (req, res) => {
+        let cities
+        let query = {}
+        let startWith = { $regex: "^" + req.query.city, $options: 'i' + req.query.city }
 
-        try {
-            let city = await City.findOne({ _id: id })
-            if (city) {
-                res.status(200).json({
-                    message: "you get one city",
-                    response: city,
-                    success: true
-                })
-            }
-            else {
-                res.status(404).json({
-                    message: "city not found",
+        if (req.query.city) {
+            query.city = req.query.city
+
+            try {
+                cities = await City.find({ city: startWith })
+                res.json(cities)
+            } catch (error) {
+                console.log(error)
+                res.status(500).json({
+                    message: "server error",
                     success: false
                 })
             }
         }
-        catch (error) {
-            console.log(error)
-            res.status(400).json({
-                message: "error in search city",
-                success: false
-            })
+        else {
+            try {
+                cities = await City.find()
+                res.json(cities)
+            } catch (error) {
+                console.log(error)
+                res.status(500).json({
+                    message: "server error",
+                    success: false
+                })
+            }
         }
+
     },
+
     //funcion que elimina ciudades por la id
     remove: async (req, res) => {
         const { id } = req.params
@@ -120,5 +139,4 @@ const cityController = {
     }
 }
 
-
-module.exports = cityController
+module.exports = cityContoller
